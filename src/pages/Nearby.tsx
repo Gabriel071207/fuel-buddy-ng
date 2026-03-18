@@ -1,10 +1,13 @@
-import { Navigation, MapPin } from 'lucide-react';
+import { Navigation } from 'lucide-react';
 import { motion } from 'framer-motion';
 import StationCard from '@/components/StationCard';
-import { mockStations } from '@/data/stations';
+import { useStations } from '@/hooks/useStations';
+import { useUserLocation } from '@/hooks/useLocation';
 
 export default function Nearby() {
-  const sorted = [...mockStations].sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+  const { latitude, longitude } = useUserLocation();
+  const { data: stations = [], isLoading } = useStations(latitude ?? undefined, longitude ?? undefined);
+  const sorted = [...stations].sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
 
   return (
     <div className="min-h-screen pb-24 pt-16">
@@ -19,11 +22,17 @@ export default function Nearby() {
           </div>
         </motion.div>
 
-        <div className="space-y-3">
-          {sorted.map((station, i) => (
-            <StationCard key={station.id} station={station} index={i} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {sorted.map((station, i) => (
+              <StationCard key={station.id} station={station} index={i} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
