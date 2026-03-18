@@ -1,7 +1,15 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Star, ShieldCheck, Clock, MapPin, Navigation, Flag, Fuel, Droplets, Flame, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Star, ShieldCheck, Clock, MapPin, Navigation, Flag, Fuel, Droplets, Flame, Heart, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { mockStations, type FuelType, type AvailabilityStatus, type QueueLevel } from '@/data/stations';
+import { useStation } from '@/hooks/useStations';
+import { useFavorites, useToggleFavorite } from '@/hooks/useFavorites';
+import { useStationRatings } from '@/hooks/useRatings';
+import { useAuth } from '@/contexts/AuthContext';
+import ConfidenceBadge from '@/components/ConfidenceBadge';
+import ReportSheet from '@/components/ReportSheet';
+import RatingSheet from '@/components/RatingSheet';
+import type { FuelType, AvailabilityStatus, QueueLevel } from '@/data/stations';
 
 const fuelIcons: Record<FuelType, React.ElementType> = { petrol: Fuel, diesel: Droplets, gas: Flame };
 
@@ -20,17 +28,28 @@ const queueBar: Record<QueueLevel, { width: string; color: string; label: string
 export default function StationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const station = mockStations.find((s) => s.id === id);
+  const { data: station, isLoading } = useStation(id);
+  const { data: favoriteIds = [] } = useFavorites();
+  const { mutate: toggleFav } = useToggleFavorite();
+  const { data: ratings = [] } = useStationRatings(id);
+  const { user } = useAuth();
+  const [reportOpen, setReportOpen] = useState(false);
+  const [ratingOpen, setRatingOpen] = useState(false);
 
-  if (!station) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Station not found</p>
-      </div>
-    );
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
 
+  if (!station) {
+    return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Station not found</p></div>;
+  }
+
+  const isFav = favoriteIds.includes(station.id);
   const queue = queueBar[station.queueLevel];
+
+  const handleNavigate = () => {
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${station.latitude},${station.longitude}`, '_blank');
+  };
 
   return (
     <div className="min-h-screen pb-8 pt-14">
@@ -41,6 +60,14 @@ export default function StationDetail() {
             <ArrowLeft className="w-4 h-4 text-foreground" />
           </button>
           <h1 className="text-sm font-semibold text-foreground truncate flex-1">{station.name}</h1>
+          {user && (
+            <button
+              onClick={() => toggleFav({ stationId: station.id, isFavorite: isFav })}
+              className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center"
+            >
+              <Heart className={`w-4 h-4 ${isFav ? 'text-destructive fill-destructive' : 'text-foreground'}`} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -69,14 +96,15 @@ export default function StationDetail() {
             </div>
 
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" /> {station.openHours}
-              </span>
+              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {station.openHours}</span>
               <span className={station.openNow ? 'text-fuel-available font-medium' : 'text-fuel-unavailable font-medium'}>
                 {station.openNow ? 'Open Now' : 'Closed'}
               </span>
               <span>Updated {station.lastUpdated}</span>
             </div>
+
+            {/* Confidence badge */}
+            <ConfidenceBadge level={station.confidence || 'low'} reportCount={station.reportCount} />
           </div>
         </motion.div>
 
@@ -113,34 +141,50 @@ export default function StationDetail() {
               <span className="text-sm font-medium text-card-foreground">{queue.label}</span>
             </div>
             <div className="h-3 bg-secondary rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: queue.width }}
-                transition={{ delay: 0.3, duration: 0.6 }}
-                className={`h-full rounded-full ${queue.color}`}
-              />
+              <motion.div initial={{ width: 0 }} animate={{ width: queue.width }} transition={{ delay: 0.3, duration: 0.6 }} className={`h-full rounded-full ${queue.color}`} />
             </div>
           </div>
         </motion.div>
 
         {/* Actions */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-3">
-          <button className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.97] transition-transform">
+          <button onClick={handleNavigate} className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.97] transition-transform">
             <Navigation className="w-4 h-4" /> Navigate
           </button>
-          <button className="flex-1 h-12 rounded-xl bg-secondary text-secondary-foreground font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.97] transition-transform">
+          <button onClick={() => setReportOpen(true)} className="flex-1 h-12 rounded-xl bg-secondary text-secondary-foreground font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.97] transition-transform">
             <Flag className="w-4 h-4" /> Report Update
           </button>
         </motion.div>
 
-        {/* Reviews placeholder */}
+        {/* Reviews */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <h3 className="text-sm font-bold text-foreground mb-3">Reviews ({station.reviewCount})</h3>
-          <div className="bg-card rounded-xl p-4 border border-border text-center text-sm text-muted-foreground">
-            Reviews coming soon — sign in to be the first to review!
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-foreground">Reviews ({station.reviewCount})</h3>
+            <button onClick={() => setRatingOpen(true)} className="text-xs font-semibold text-primary">Write Review</button>
           </div>
+          {ratings.length > 0 ? (
+            <div className="space-y-2">
+              {(ratings as any[]).map((r: any) => (
+                <div key={r.id} className="bg-card rounded-xl p-3 border border-border">
+                  <div className="flex items-center gap-1 mb-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'text-accent fill-accent' : 'text-muted-foreground'}`} />
+                    ))}
+                  </div>
+                  {r.review && <p className="text-xs text-card-foreground">{r.review}</p>}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-card rounded-xl p-4 border border-border text-center text-sm text-muted-foreground">
+              No reviews yet — be the first to review!
+            </div>
+          )}
         </motion.div>
       </div>
+
+      <ReportSheet open={reportOpen} onClose={() => setReportOpen(false)} stationId={station.id} stationName={station.name} />
+      <RatingSheet open={ratingOpen} onClose={() => setRatingOpen(false)} stationId={station.id} stationName={station.name} />
     </div>
   );
 }

@@ -38,7 +38,7 @@ export default function FilterSheet({ open, onClose, filters, onFiltersChange }:
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-foreground/20 z-50"
+            className="fixed inset-0 bg-foreground/20 z-[60]"
             onClick={onClose}
           />
           <motion.div
@@ -46,7 +46,8 @@ export default function FilterSheet({ open, onClose, filters, onFiltersChange }:
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-3xl p-6 pb-10 max-h-[70vh] overflow-y-auto"
+            className="fixed inset-x-0 bottom-0 z-[60] bg-card rounded-t-3xl p-6 pb-10"
+            style={{ maxHeight: '100dvh' }}
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-card-foreground">Filters</h2>
@@ -64,9 +65,7 @@ export default function FilterSheet({ open, onClose, filters, onFiltersChange }:
                     key={ft.value}
                     onClick={() => onFiltersChange({ ...filters, fuelType: ft.value })}
                     className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                      filters.fuelType === ft.value
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground'
+                      filters.fuelType === ft.value ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
                     }`}
                   >
                     {ft.icon && <ft.icon className="w-3.5 h-3.5" />}
@@ -82,10 +81,7 @@ export default function FilterSheet({ open, onClose, filters, onFiltersChange }:
                 Max Distance: <span className="text-primary">{filters.maxDistance}km</span>
               </h3>
               <input
-                type="range"
-                min={1}
-                max={20}
-                value={filters.maxDistance}
+                type="range" min={1} max={20} value={filters.maxDistance}
                 onChange={(e) => onFiltersChange({ ...filters, maxDistance: Number(e.target.value) })}
                 className="w-full accent-primary"
               />
@@ -96,20 +92,14 @@ export default function FilterSheet({ open, onClose, filters, onFiltersChange }:
               <h3 className="text-sm font-semibold text-card-foreground">Available fuel only</h3>
               <button
                 onClick={() => onFiltersChange({ ...filters, availableOnly: !filters.availableOnly })}
-                className={`w-12 h-7 rounded-full transition-colors relative ${
-                  filters.availableOnly ? 'bg-primary' : 'bg-secondary'
-                }`}
+                className={`w-12 h-7 rounded-full transition-colors relative ${filters.availableOnly ? 'bg-primary' : 'bg-secondary'}`}
               >
-                <div
-                  className={`w-5 h-5 rounded-full bg-card shadow absolute top-1 transition-transform ${
-                    filters.availableOnly ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
+                <div className={`w-5 h-5 rounded-full bg-card shadow absolute top-1 transition-transform ${filters.availableOnly ? 'translate-x-6' : 'translate-x-1'}`} />
               </button>
             </div>
 
             {/* Sort By */}
-            <div className="mb-2">
+            <div className="mb-6">
               <h3 className="text-sm font-semibold text-card-foreground mb-3">Sort By</h3>
               <div className="flex flex-wrap gap-2">
                 {sortOptions.map((opt) => (
@@ -117,9 +107,7 @@ export default function FilterSheet({ open, onClose, filters, onFiltersChange }:
                     key={opt.value}
                     onClick={() => onFiltersChange({ ...filters, sortBy: opt.value })}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                      filters.sortBy === opt.value
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground'
+                      filters.sortBy === opt.value ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
                     }`}
                   >
                     {opt.label}
@@ -127,6 +115,14 @@ export default function FilterSheet({ open, onClose, filters, onFiltersChange }:
                 ))}
               </div>
             </div>
+
+            {/* Apply button */}
+            <button
+              onClick={onClose}
+              className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center shadow-lg shadow-primary/20 active:scale-[0.97] transition-transform"
+            >
+              Apply Filters
+            </button>
           </motion.div>
         </>
       )}

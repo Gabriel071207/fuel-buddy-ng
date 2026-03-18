@@ -24,6 +24,8 @@ export interface Station {
   openHours: string;
   imageUrl?: string;
   distance?: number;
+  confidence?: string;
+  reportCount?: number;
 }
 
 export const mockStations: Station[] = [

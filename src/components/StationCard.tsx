@@ -1,18 +1,17 @@
-import { MapPin, Clock, Star, ShieldCheck, Fuel, Droplets, Flame } from 'lucide-react';
+import { MapPin, Clock, Star, ShieldCheck, Fuel, Droplets, Flame, Heart, Navigation } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useFavorites, useToggleFavorite } from '@/hooks/useFavorites';
+import ConfidenceBadge from '@/components/ConfidenceBadge';
 import type { Station, FuelType, AvailabilityStatus, QueueLevel } from '@/data/stations';
 
 const fuelIcons: Record<FuelType, React.ElementType> = {
-  petrol: Fuel,
-  diesel: Droplets,
-  gas: Flame,
+  petrol: Fuel, diesel: Droplets, gas: Flame,
 };
 
 const availabilityColors: Record<AvailabilityStatus, string> = {
-  available: 'bg-fuel-available',
-  limited: 'bg-fuel-limited',
-  unavailable: 'bg-fuel-unavailable',
+  available: 'bg-fuel-available', limited: 'bg-fuel-limited', unavailable: 'bg-fuel-unavailable',
 };
 
 const queueConfig: Record<QueueLevel, { label: string; color: string }> = {
@@ -23,7 +22,22 @@ const queueConfig: Record<QueueLevel, { label: string; color: string }> = {
 
 export default function StationCard({ station, index }: { station: Station; index: number }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data: favIds = [] } = useFavorites();
+  const { mutate: toggleFav } = useToggleFavorite();
   const queue = queueConfig[station.queueLevel];
+  const isFav = favIds.includes(station.id);
+
+  const handleNavigate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${station.latitude},${station.longitude}`, '_blank');
+  };
+
+  const handleFav = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) { navigate('/auth'); return; }
+    toggleFav({ stationId: station.id, isFavorite: isFav });
+  };
 
   return (
     <motion.div
@@ -31,8 +45,7 @@ export default function StationCard({ station, index }: { station: Station; inde
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
       onClick={() => navigate(`/station/${station.id}`)}
-      className="bg-card rounded-2xl p-4 shadow-sm border border-border cursor-pointer 
-                 hover:shadow-md transition-all active:scale-[0.98]"
+      className="bg-card rounded-2xl p-4 shadow-sm border border-border cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
@@ -45,11 +58,16 @@ export default function StationCard({ station, index }: { station: Station; inde
             <span className="text-xs text-muted-foreground truncate">{station.address}</span>
           </div>
         </div>
-        {station.distance !== undefined && (
-          <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-lg ml-2 flex-shrink-0">
-            {station.distance}km
-          </span>
-        )}
+        <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
+          {station.distance !== undefined && (
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-lg">
+              {station.distance}km
+            </span>
+          )}
+          <button onClick={handleFav} className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+            <Heart className={`w-3.5 h-3.5 ${isFav ? 'text-destructive fill-destructive' : 'text-muted-foreground'}`} />
+          </button>
+        </div>
       </div>
 
       {/* Fuel pills */}
@@ -57,10 +75,7 @@ export default function StationCard({ station, index }: { station: Station; inde
         {station.fuels.map((fuel) => {
           const Icon = fuelIcons[fuel.type];
           return (
-            <div
-              key={fuel.type}
-              className="flex items-center gap-1.5 bg-secondary rounded-xl px-2.5 py-1.5"
-            >
+            <div key={fuel.type} className="flex items-center gap-1.5 bg-secondary rounded-xl px-2.5 py-1.5">
               <div className={`w-2 h-2 rounded-full ${availabilityColors[fuel.availability]}`} />
               <Icon className="w-3.5 h-3.5 text-muted-foreground" />
               <span className="text-xs font-medium text-card-foreground capitalize">{fuel.type}</span>
@@ -80,9 +95,15 @@ export default function StationCard({ station, index }: { station: Station; inde
             <span className="text-muted-foreground">({station.reviewCount})</span>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-muted-foreground">
-          <Clock className="w-3 h-3" />
-          <span>{station.lastUpdated}</span>
+        <div className="flex items-center gap-2">
+          {station.confidence && <ConfidenceBadge level={station.confidence} />}
+          <button onClick={handleNavigate} className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Navigation className="w-3 h-3 text-primary" />
+          </button>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Clock className="w-3 h-3" />
+            <span>{station.lastUpdated}</span>
+          </div>
         </div>
       </div>
     </motion.div>
