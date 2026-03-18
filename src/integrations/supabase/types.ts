@@ -14,16 +14,284 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          station_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          station_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          station_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          location_enabled: boolean
+          notifications_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          location_enabled?: boolean
+          notifications_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          location_enabled?: boolean
+          notifications_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      station_ratings: {
+        Row: {
+          created_at: string
+          id: string
+          rating: number
+          review: string | null
+          station_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rating: number
+          review?: string | null
+          station_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rating?: number
+          review?: string | null
+          station_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "station_ratings_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      station_reports: {
+        Row: {
+          created_at: string
+          fuel_type: Database["public"]["Enums"]["fuel_type"]
+          id: string
+          is_owner_report: boolean
+          reported_availability:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          reported_price: number | null
+          reported_queue: Database["public"]["Enums"]["queue_level"] | null
+          station_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          fuel_type: Database["public"]["Enums"]["fuel_type"]
+          id?: string
+          is_owner_report?: boolean
+          reported_availability?:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          reported_price?: number | null
+          reported_queue?: Database["public"]["Enums"]["queue_level"] | null
+          station_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          fuel_type?: Database["public"]["Enums"]["fuel_type"]
+          id?: string
+          is_owner_report?: boolean
+          reported_availability?:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          reported_price?: number | null
+          reported_queue?: Database["public"]["Enums"]["queue_level"] | null
+          station_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "station_reports_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stations: {
+        Row: {
+          address: string
+          avg_rating: number
+          computed_diesel_avail:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          computed_diesel_price: number | null
+          computed_gas_avail:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          computed_gas_price: number | null
+          computed_petrol_avail:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          computed_petrol_price: number | null
+          computed_queue: Database["public"]["Enums"]["queue_level"] | null
+          confidence: Database["public"]["Enums"]["confidence_level"] | null
+          created_at: string
+          id: string
+          last_updated: string
+          latitude: number
+          longitude: number
+          name: string
+          open_hours: string
+          open_now: boolean
+          owner_id: string | null
+          rating_count: number
+          report_count: number
+          verified: boolean
+        }
+        Insert: {
+          address: string
+          avg_rating?: number
+          computed_diesel_avail?:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          computed_diesel_price?: number | null
+          computed_gas_avail?:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          computed_gas_price?: number | null
+          computed_petrol_avail?:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          computed_petrol_price?: number | null
+          computed_queue?: Database["public"]["Enums"]["queue_level"] | null
+          confidence?: Database["public"]["Enums"]["confidence_level"] | null
+          created_at?: string
+          id?: string
+          last_updated?: string
+          latitude?: number
+          longitude?: number
+          name: string
+          open_hours?: string
+          open_now?: boolean
+          owner_id?: string | null
+          rating_count?: number
+          report_count?: number
+          verified?: boolean
+        }
+        Update: {
+          address?: string
+          avg_rating?: number
+          computed_diesel_avail?:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          computed_diesel_price?: number | null
+          computed_gas_avail?:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          computed_gas_price?: number | null
+          computed_petrol_avail?:
+            | Database["public"]["Enums"]["availability_status"]
+            | null
+          computed_petrol_price?: number | null
+          computed_queue?: Database["public"]["Enums"]["queue_level"] | null
+          confidence?: Database["public"]["Enums"]["confidence_level"] | null
+          created_at?: string
+          id?: string
+          last_updated?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          open_hours?: string
+          open_now?: boolean
+          owner_id?: string | null
+          rating_count?: number
+          report_count?: number
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      recalculate_station_truth: {
+        Args: { p_station_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user" | "station_owner"
+      availability_status: "available" | "limited" | "unavailable"
+      confidence_level: "low" | "medium" | "high" | "outdated"
+      fuel_type: "petrol" | "diesel" | "gas"
+      queue_level: "low" | "medium" | "high"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +418,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user", "station_owner"],
+      availability_status: ["available", "limited", "unavailable"],
+      confidence_level: ["low", "medium", "high", "outdated"],
+      fuel_type: ["petrol", "diesel", "gas"],
+      queue_level: ["low", "medium", "high"],
+    },
   },
 } as const
