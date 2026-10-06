@@ -85,3 +85,27 @@ The application demonstrates the core product concept and user experience. Some 
 Computer Science Student | Aspiring Full-Stack Developer
 
 GitHub: [Gabriel071207](https://github.com/Gabriel071207)
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center">
+      <strong>Find nearby fuel stations</strong><br><br>
+      <img src="home.png" width="250">
+    </td>
+    <td align="center">
+      <strong>View station details</strong><br><br>
+      <img src="station-details.png" width="250">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>Search, filter and sort</strong><br><br>
+      <img src="filters.png" width="250">
+    </td>
+    <td align="center">
+      <strong>Community live reports</strong><br><br>
+      <img src="live-reports.png" width="250">
+    </td>
+  </tr>
+</table>
