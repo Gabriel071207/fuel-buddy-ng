@@ -109,3 +109,27 @@ GitHub: [Gabriel071207](https://github.com/Gabriel071207)
     </td>
   </tr>
 </table>
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center">
+      <strong>Marketplace homepage</strong><br><br>
+      <img src="home.page.png" width="250">
+    </td>
+    <td align="center">
+      <strong>Product details</strong><br><br>
+      <img src="Product-details.png" width="250">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>Shopping cart</strong><br><br>
+      <img src="cart.png" width="250">
+    </td>
+    <td align="center">
+      <strong>Checkout & payment</strong><br><br>
+      <img src="payment.png" width="250">
+    </td>
+  </tr>
+</table>
